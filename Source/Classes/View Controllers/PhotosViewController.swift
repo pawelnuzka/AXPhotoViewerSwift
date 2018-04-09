@@ -868,6 +868,10 @@ import MobileCoreServices
         return self.maximumZoomScale(for: photo, minimumZoomScale: minimumZoomScale, imageSize: imageSize)
     }
     
+    public func photoViewController(_ photoViewController: PhotoViewController, playVideoAt index: Int, asset: PhotoProtocol) {
+        playVideo(at: index, asset: asset)
+    }
+    
     // MARK: - PhotosViewControllerDelegate calls
     
     /// Called when the `PhotosViewController` navigates to a new photo. This is defined as when the swipe percent between pages
@@ -951,6 +955,11 @@ import MobileCoreServices
         self.delegate?.photosViewController?(self, actionCompletedWith: activityType, for: photo)
     }
     
+    @objc(playVideoAtIndex:forAsset:)
+    open func playVideo(at index: Int, asset: PhotoProtocol) {
+        self.delegate?.photosViewController?(self, playVideoAt: index, asset: asset)
+    }
+
     // MARK: - NetworkIntegrationDelegate
     public func networkIntegration(_ networkIntegration: NetworkIntegrationProtocol, loadDidFinishWith photo: PhotoProtocol) {
         if let imageData = photo.imageData {
@@ -1118,8 +1127,11 @@ fileprivate extension UIScrollView {
     /// - Note: This is only called for the default action.
     @objc(photosViewController:actionCompletedWithActivityType:forPhoto:)
     optional func photosViewController(_ photosViewController: PhotosViewController, 
-                                       actionCompletedWith activityType: UIActivityType, 
+                                       actionCompletedWith activityType: UIActivityType,
                                        for photo: PhotoProtocol)
+    
+    @objc(photosViewController:playVideoAtIndex:forAsset:)
+    optional func photosViewController(_ photosViewController: PhotosViewController, playVideoAt index: Int, asset: PhotoProtocol)
 }
 
 // MARK: - Notification definitions

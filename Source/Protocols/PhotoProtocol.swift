@@ -27,4 +27,8 @@
     /// The URL of the image.
     var url: URL? { get }
     
+    /// The URL of the video
+    @objc var videoUrl: URL? { get }
+    
+    @objc var isVideo: Bool { get }
 }

@@ -22,6 +22,8 @@
         self.imageData = imageData
         self.image = image
         self.url = url
+        self.videoUrl = nil
+        self.isVideo = false
         
         super.init()
     }
@@ -45,4 +47,7 @@
     /// The URL of the image. If present, this value will be passed to a `NetworkIntegration` to be downloaded.
     public var url: URL?
     
+    @objc public var videoUrl: URL?
+    
+    @objc public var isVideo: Bool
 }

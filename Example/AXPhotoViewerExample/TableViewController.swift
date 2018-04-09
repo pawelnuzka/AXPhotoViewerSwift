@@ -217,7 +217,7 @@ class TableViewController: UITableViewController, PhotosViewControllerDelegate, 
         // (or, you're using a predefined integration that has a shared cache with your codebase)
         self.loadContent(at: indexPath, completion: nil)
     }
-    
+        
     // MARK: - UIViewControllerPreviewingDelegate
     func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
         guard let indexPath = self.tableView.indexPathForRow(at: location),

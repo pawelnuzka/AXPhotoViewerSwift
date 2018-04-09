@@ -15,12 +15,9 @@ import FLAnimatedImage
     public var pageIndex: Int = 0
     
     fileprivate(set) var loadingView: LoadingViewProtocol?
+    private var playVideoButton: UIButton?
 
-    var zoomingImageView: ZoomingImageView {
-        get {
-            return self.view as! ZoomingImageView
-        }
-    }
+    var zoomingImageView = ZoomingImageView()
     
     fileprivate var photo: PhotoProtocol?
     fileprivate weak var notificationCenter: NotificationCenter?
@@ -40,6 +37,8 @@ import FLAnimatedImage
                                        selector: #selector(photoImageDidUpdate(_:)),
                                        name: .photoImageUpdate,
                                        object: nil)
+        
+        self.playVideoButton = setupPlayVideoButton()
     }
     
     public required init?(coder aDecoder: NSCoder) {
@@ -50,17 +49,20 @@ import FLAnimatedImage
         self.notificationCenter?.removeObserver(self)
     }
     
-    open override func loadView() {
-        self.view = ZoomingImageView()
-    }
-    
     open override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.view.addSubview(self.zoomingImageView)
+        self.zoomingImageView.translatesAutoresizingMaskIntoConstraints = false
+        self.zoomingImageView.frame = self.view.frame
         self.zoomingImageView.zoomScaleDelegate = self
         
         if let loadingView = self.loadingView as? UIView {
             self.view.addSubview(loadingView)
+        }
+        
+        if let playVideoButton = self.playVideoButton {
+            self.view.addSubview(playVideoButton)
         }
     }
     
@@ -71,6 +73,19 @@ import FLAnimatedImage
         (self.loadingView as? UIView)?.frame = CGRect(origin: CGPoint(x: floor((self.view.bounds.size.width - loadingViewSize.width) / 2),
                                                                       y: floor((self.view.bounds.size.height - loadingViewSize.height) / 2)),
                                                       size: loadingViewSize)
+        self.playVideoButton?.center = self.view.center
+    }
+    
+    private func setupPlayVideoButton() -> UIButton? {
+        guard let image = UIImage(named: "playIcon", in: Bundle(for: PhotoViewController.self), compatibleWith: nil) else { return nil }
+        
+        let button = UIButton()
+        button.isHidden = true
+        button.setImage(image, for: .normal)
+        button.frame.size = image.size
+        button.addTarget(self, action: #selector(playVideo), for: .touchUpInside)
+        
+        return button
     }
     
     public func applyPhoto(_ photo: PhotoProtocol) {
@@ -113,6 +128,11 @@ import FLAnimatedImage
             } else if let image = photo.image {
                 self.zoomingImageView.image = image
             }
+            
+            if photo.isVideo {
+                self.playVideoButton?.isHidden = false
+                self.zoomingImageView.isUserInteractionEnabled = false
+            }
         }
         
         self.view.setNeedsLayout()
@@ -122,6 +142,8 @@ import FLAnimatedImage
     func prepareForReuse() {
         self.zoomingImageView.image = nil
         self.zoomingImageView.animatedImage = nil
+        self.playVideoButton?.isHidden = true
+        self.zoomingImageView.isUserInteractionEnabled = true
     }
     
     // MARK: - ZoomingImageViewDelegate
@@ -176,6 +198,11 @@ import FLAnimatedImage
         }
     }
 
+    @objc fileprivate func playVideo() {
+        guard let photo = photo else { return }
+        
+        self.delegate?.photoViewController(self, playVideoAt: self.pageIndex, asset: photo)
+    }
 }
 
 @objc(AXPhotoViewControllerDelegate) public protocol PhotoViewControllerDelegate: AnyObject, NSObjectProtocol {
@@ -189,4 +216,6 @@ import FLAnimatedImage
                              minimumZoomScale: CGFloat,
                              imageSize: CGSize) -> CGFloat
     
+    @objc(photoViewController:playVideoAtIndex:forAsset:)
+    func photoViewController(_ photoViewController: PhotoViewController, playVideoAt index: Int, asset: PhotoProtocol)
 }
