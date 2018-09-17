@@ -93,9 +93,9 @@ import NVActivityIndicatorView
     
     open func didBecameActive() {
         isTransitioning = false
-        if (self.delegate?.photoViewControllerShouldAutoPlayVideo(self))! {
+        if let delegate = delegate, delegate.photoViewControllerShouldAutoPlayVideo(self) {
             playIfVideo()
-        }else{
+        } else{
             self.videoPlayerView?.isHidden = true
         }
     }
