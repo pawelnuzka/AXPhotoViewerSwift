@@ -567,7 +567,8 @@ import MobileCoreServices
         
         self.overlayView.captionView.applyCaptionInfo(attributedTitle: photo.attributedTitle ?? nil,
                                                       attributedDescription: photo.attributedDescription ?? nil,
-                                                      attributedCredit: photo.attributedCredit ?? nil)
+                                                      attributedCredit: photo.attributedCredit ?? nil,
+                                                      bottomPadding: photo.isVideo)
         self.updateBarButtons(for: photoIndex)
     }
     

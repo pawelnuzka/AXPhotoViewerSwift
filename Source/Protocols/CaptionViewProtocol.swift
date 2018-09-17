@@ -24,7 +24,8 @@
     ///   - attributedCredit: The attributed credit of the new photo.
     func applyCaptionInfo(attributedTitle: NSAttributedString?,
                           attributedDescription: NSAttributedString?,
-                          attributedCredit: NSAttributedString?)
+                          attributedCredit: NSAttributedString?,
+                          bottomPadding: Bool)
     
     /// The `PhotosViewController` uses this method to correctly size the caption view for a constrained width.
     ///

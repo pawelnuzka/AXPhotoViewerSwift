@@ -30,6 +30,7 @@ import UIKit
     fileprivate var isCaptionAnimatingOut = false
     
     fileprivate var isFirstLayout: Bool = true
+    fileprivate var isBottomPadding = false
     
     open var defaultTitleAttributes: [String: Any] {
         get {
@@ -138,7 +139,8 @@ import UIKit
 
     open func applyCaptionInfo(attributedTitle: NSAttributedString?,
                                attributedDescription: NSAttributedString?,
-                               attributedCredit: NSAttributedString?) {
+                               attributedCredit: NSAttributedString?,
+                               bottomPadding: Bool) {
         
         func makeAttributedStringWithDefaults(_ defaults: [String: Any], for attributedString: NSAttributedString?) -> NSAttributedString? {
             guard let defaultAttributedString = attributedString?.mutableCopy() as? NSMutableAttributedString else {
@@ -163,6 +165,7 @@ import UIKit
             return defaultAttributedString
         }
         
+        self.isBottomPadding = bottomPadding
         let title = makeAttributedStringWithDefaults(self.defaultTitleAttributes, for: attributedTitle)
         let description = makeAttributedStringWithDefaults(self.defaultDescriptionAttributes, for: attributedDescription)
         let credit = makeAttributedStringWithDefaults(self.defaultCreditAttributes, for: attributedCredit)
@@ -320,7 +323,7 @@ import UIKit
                                                                                       fontTextStyle: .body)
         self.creditSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.creditSizingLabel.attributedText, 
                                                                                  fontTextStyle: .caption1)
-        
+        let bottomPadding: CGFloat = self.isBottomPadding ? 65 : 0
         let VerticalPadding: CGFloat = 10
         let HorizontalPadding: CGFloat = 15
         let InterLabelSpacing: CGFloat = 2
@@ -344,7 +347,7 @@ import UIKit
             
             yOffset += labelFrame.size.height
             if index == (self.visibleSizingLabels.count - 1) {
-                yOffset += VerticalPadding
+                yOffset += (VerticalPadding + bottomPadding)
             }
             
             if applySizingLayout {
