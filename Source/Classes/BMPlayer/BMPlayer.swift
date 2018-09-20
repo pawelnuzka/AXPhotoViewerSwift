@@ -478,11 +478,21 @@ extension BMPlayer: BMPlayerLayerViewDelegate {
         controlView.totalDuration = totalDuration
         self.totalDuration = totalDuration
     }
-    
+
+    fileprivate func isPlaybackInProgress() -> Bool {
+        guard let player = self.avPlayer else { return false }
+
+        if #available(iOS 10.0, *) {
+            return player.timeControlStatus == .playing
+        } else {
+            return player.rate != 0 && player.error == nil
+        }
+    }
+
     public func bmPlayer(player: BMPlayerLayerView, playerStateDidChange state: BMPlayerState) {
         BMPlayerManager.shared.log("playerStateDidChange - \(state)")
         
-        controlView.playerStateDidChange(state: state)
+        controlView.playerStateDidChange(state: state, isPlaybackInProgress: isPlaybackInProgress())
         switch state {
         case BMPlayerState.readyToPlay:
             if !isPauseByUser {

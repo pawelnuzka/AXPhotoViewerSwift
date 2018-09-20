@@ -141,14 +141,14 @@ open class BMPlayerControlView: UIView {
     open func loadedTimeDidChange(loadedDuration: TimeInterval , totalDuration: TimeInterval) {
         progressView.setProgress(Float(loadedDuration)/Float(totalDuration), animated: true)
     }
-    
-    open func playerStateDidChange(state: BMPlayerState) {
+
+    open func playerStateDidChange(state: BMPlayerState, isPlaybackInProgress: Bool) {
         switch state {
         case .readyToPlay:
             hideLoader()
             
         case .buffering:
-            showLoader()
+            isPlaybackInProgress ? hideLoader() : showLoader()
             
         case .bufferFinished:
             hideLoader()
