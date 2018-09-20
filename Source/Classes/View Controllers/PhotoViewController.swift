@@ -21,6 +21,8 @@ import NVActivityIndicatorView
     
     public var isLoading = false
     
+    private (set) public var isPlayingVideo = false
+    
     fileprivate(set) var loadingView: LoadingViewProtocol?
     private var playVideoButton: UIButton?
 
@@ -198,6 +200,7 @@ import NVActivityIndicatorView
         self.playVideoButton?.isHidden = true
         self.zoomingImageView.isUserInteractionEnabled = true
         self.isLoading = false
+        isPlayingVideo = false
         isTransitioning = false
         
         setupVideoPlayerView()
@@ -261,7 +264,7 @@ import NVActivityIndicatorView
             return
         }
         videoPlayerView?.isHidden = false
-        isLoading = true
+        isPlayingVideo = true
         let asset = BMPlayerResource(url: photo.videoPlaybackUrl!,
                                      name: photo.attributedTitle??.string ?? "")
         videoPlayerView?.setVideo(resource: asset)
@@ -275,6 +278,7 @@ import NVActivityIndicatorView
          guard let photo = photo else { return }
 
         if state == BMPlayerState.playedToTheEnd {
+            isPlayingVideo = false
             self.delegate?.photoViewController(self, didEndPlayingVideoAt: self.pageIndex, asset: photo)
             videoPlayerView?.isHidden = true
         }
@@ -289,9 +293,7 @@ import NVActivityIndicatorView
     }
     
     public func bmPlayer(player: BMPlayer, playerIsPlaying playing: Bool) {
-        if isLoading && playing {
-            isLoading = false
-        }
+
     }
     
     func setupVideoPlayerView() {
@@ -318,13 +320,6 @@ import NVActivityIndicatorView
         videoPlayerView?.showControlView(visible: visible)
     }
     
-    func isPlayingVideo() -> Bool {
-        guard let videoPlayerView = videoPlayerView else {
-                return false
-        }
-    
-        return videoPlayerView.isPlaying
-    }
     
     func isVideoControlVisible() -> Bool {
         guard let videoPlayerView = videoPlayerView else {

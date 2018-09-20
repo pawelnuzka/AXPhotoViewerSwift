@@ -523,7 +523,7 @@ import MobileCoreServices
         
         guard let currentPhotoViewController = self.currentPhotoViewController else { return false }
         
-        let isPlayingVideo = currentPhotoViewController.isPlayingVideo()
+        let isPlayingVideo = currentPhotoViewController.isPlayingVideo
         let isLoading = currentPhotoViewController.isLoading
         let canSlide = !isPlayingVideo && !isLoading
         return canSlide
