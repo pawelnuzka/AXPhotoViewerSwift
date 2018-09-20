@@ -18,6 +18,9 @@ import MobileCoreServices
     /// The underlying `OverlayView` that is used for displaying photo captions, titles, and actions.
     open let overlayView = OverlayView()
     
+    /// Gesture Recognizer for catching swipe gestures on caption view and blocking page swiping
+    let preventPageSwipeGestureRecognizer = UIPanGestureRecognizer(target: self, action: nil)
+    
     open var shouldHaveHiddenNavigationInitially = true
     
     /// The photos to display in the PhotosViewController.
@@ -375,6 +378,7 @@ import MobileCoreServices
             self.pageViewController.didMove(toParentViewController: self)
             
             self.configureInitialPageViewController()
+            self.configurePreventPageSwipeGestureRecognizer()
         }
         
         if self.overlayView.superview == nil {
@@ -975,6 +979,29 @@ import MobileCoreServices
         }
     }
 
+}
+
+extension PhotosViewController : UIGestureRecognizerDelegate {
+    public  func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer === preventPageSwipeGestureRecognizer {
+            //Disable page swipe for video controls section
+            if let currentPhotoViewController = self.currentPhotoViewController, currentPhotoViewController.isVideoControlVisible() {
+                let gestureLocation = gestureRecognizer.location(in: self.overlayView.captionView)
+                let isInsideCaption = self.overlayView.captionView.bounds.contains(gestureLocation)
+                return isInsideCaption
+            }
+        }
+
+        return false
+    }
+
+    func configurePreventPageSwipeGestureRecognizer() {
+        preventPageSwipeGestureRecognizer.delegate = self
+        self.view.addGestureRecognizer(preventPageSwipeGestureRecognizer)
+        self.pageViewController.view.subviews.forEach {
+            ($0 as? UIScrollView )?.panGestureRecognizer.require(toFail: self.preventPageSwipeGestureRecognizer)
+        }
+    }
 }
 
 

@@ -325,6 +325,14 @@ import NVActivityIndicatorView
     
         return videoPlayerView.isPlaying
     }
+    
+    func isVideoControlVisible() -> Bool {
+        guard let videoPlayerView = videoPlayerView else {
+            return false
+        }
+        
+        return !videoPlayerView.isHidden && !videoPlayerView.controlView.isHidden
+    }
 }
 
 @objc(AXPhotoViewControllerDelegate) public protocol PhotoViewControllerDelegate: AnyObject, NSObjectProtocol {
