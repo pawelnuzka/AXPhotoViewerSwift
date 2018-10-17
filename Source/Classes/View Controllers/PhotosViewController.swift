@@ -410,9 +410,8 @@ import MobileCoreServices
     }
     
     open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        
         self.isSizeTransitioning = true
+        super.viewWillTransition(to: size, with: coordinator)
         coordinator.animate(alongsideTransition: nil) { [weak self] (context) in
             self?.isSizeTransitioning = false
         }
@@ -498,7 +497,7 @@ import MobileCoreServices
         if let nextController = self.makePhotoViewController(for: nextPhotoIndex) {
             loadPhotos(at: nextController.pageIndex)
             self.isViewTransitioning = true
-            slide(to: nextController, animated: true, completion: { [weak self] (result) in
+            slide(to: nextController, animated: !self.isSizeTransitioning, completion: { [weak self] (result) in
                
                 self?.reduceMemoryForPhotos(at: nextController.pageIndex)
                 self?.isViewTransitioning = false
@@ -523,9 +522,10 @@ import MobileCoreServices
         
         guard let currentPhotoViewController = self.currentPhotoViewController else { return false }
         
+        let isTransitioning = currentPhotoViewController.isTransitioning
         let isPlayingVideo = currentPhotoViewController.isPlayingVideo
         let isLoading = currentPhotoViewController.isLoading
-        let canSlide = !isPlayingVideo && !isLoading
+        let canSlide = !isPlayingVideo && !isLoading && !isTransitioning
         return canSlide
     }
     
@@ -760,6 +760,7 @@ import MobileCoreServices
         
         self.currentPhotoIndex = viewController.pageIndex
         self.reduceMemoryForPhotos(at: viewController.pageIndex)
+        isViewTransitioning = false
         
         if let previousViewController = previousViewControllers.first as? PhotoViewController  {
             //only reload in case new page index
@@ -770,7 +771,7 @@ import MobileCoreServices
         }else {
             viewController.didBecameActive()
         }
-        isViewTransitioning = false
+
         automaticSlideshow.restart()
     }
     
@@ -827,7 +828,7 @@ import MobileCoreServices
     }
 
     public func photoViewController(_ photoViewController: PhotoViewController, didEndPlayingVideoAt index: Int, asset: PhotoProtocol){
-        if automaticSlideshow.isPlaying {
+        if automaticSlideshow.isPlaying && !self.isViewTransitioning  && photoViewController == currentPhotoViewController {
             slideToNext()
         }
     }
