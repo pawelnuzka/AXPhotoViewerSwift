@@ -746,6 +746,7 @@ import MobileCoreServices
         guard let viewController = pendingViewControllers.first as? PhotoViewController else {
             return
         }
+
         self.currentPhotoViewController?.isTransitioning = true
         isViewTransitioning = true
         previousPhotoIndex = self.currentPhotoIndex
@@ -761,6 +762,7 @@ import MobileCoreServices
         self.currentPhotoIndex = viewController.pageIndex
         self.reduceMemoryForPhotos(at: viewController.pageIndex)
         isViewTransitioning = false
+        self.currentPhotoViewController?.isTransitioning = false
         
         if let previousViewController = previousViewControllers.first as? PhotoViewController  {
             //only reload in case new page index
