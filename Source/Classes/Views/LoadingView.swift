@@ -18,7 +18,7 @@ import AXStateButton
     open var errorImage: UIImage? {
         get {
             let bundle = Bundle(for: LoadingView.self)
-            return UIImage(named: "error", in: bundle, compatibleWith: nil)
+            return UIImage(named: "error", in: bundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
         }
     }
     
@@ -43,11 +43,8 @@ import AXStateButton
             }
             
             let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
-            let textColor = UIColor.white
-            
             return [
-                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
-                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
+                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font
             ]
         }
     }
@@ -71,12 +68,7 @@ import AXStateButton
             }
             
             let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
-            let textColor = UIColor.white
-            
-            return [
-                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
-                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
-            ]
+            return [convertFromNSAttributedStringKey(NSAttributedString.Key.font): font]
         }
     }
     
@@ -133,8 +125,6 @@ import AXStateButton
                 totalHeight += errorImageViewSize.height
                 totalHeight += ImageViewVerticalPadding
             }
-            
-            errorLabel.attributedText = makeAttributedStringWithAttributes(self.errorAttributes, for: errorLabel.attributedText)
             
             errorLabelSize = errorLabel.sizeThatFits(constrainedSize)
             totalHeight += errorLabelSize.height
@@ -215,35 +205,36 @@ import AXStateButton
         
         if let errorImage = self.errorImage {
             self.errorImageView = UIImageView(image: errorImage)
-            self.errorImageView?.tintColor = .white
             self.addSubview(self.errorImageView!)
         } else {
             self.errorImageView?.removeFromSuperview()
             self.errorImageView = nil
         }
         
-        self.errorLabel = UILabel()
-        self.errorLabel?.attributedText = NSAttributedString(string: self.errorText, attributes: convertToOptionalNSAttributedStringKeyDictionary(self.errorAttributes))
-        self.errorLabel?.textAlignment = .center
-        self.errorLabel?.numberOfLines = 3
-        self.errorLabel?.textColor = .white
-        self.addSubview(self.errorLabel!)
+        errorLabel = UILabel()
+
+        errorLabel?.text = self.errorText
+        errorLabel?.textAlignment = .center
+        errorLabel?.numberOfLines = 3
+        errorLabel?.textColor = self.tintColor
+        addSubview(self.errorLabel!)
         
-        self.retryButton = StateButton()
-        self.retryButton?.controlStateAnimationTimingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
-        self.retryButton?.controlStateAnimationDuration = 0.1
-        self.retryButton?.setAttributedTitle(NSAttributedString(string: self.retryText, attributes: convertToOptionalNSAttributedStringKeyDictionary(self.retryAttributes)),
+        retryButton = StateButton()
+        
+        retryButton?.controlStateAnimationTimingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        retryButton?.controlStateAnimationDuration = 0.1
+        retryButton?.setAttributedTitle(NSAttributedString(string: self.retryText, attributes: convertToOptionalNSAttributedStringKeyDictionary(self.retryAttributes)),
                                              for: .normal)
-        self.retryButton?.setBorderWidth(1.0, for: .normal)
-        self.retryButton?.setBorderColor(.white, for: .normal)
-        self.retryButton?.setAlpha(1.0, for: .normal)
-        self.retryButton?.setAlpha(0.3, for: .highlighted)
-        self.retryButton?.setTransformScale(1.0, for: .normal)
-        self.retryButton?.setTransformScale(0.95, for: .highlighted)
-        self.retryButton?.addTarget(self, action: #selector(retryButtonAction(_:)), for: .touchUpInside)
-        self.addSubview(self.retryButton!)
+        retryButton?.setBorderWidth(1.0, for: .normal)
+        retryButton?.setBorderColor(self.tintColor, for: .normal)
+        retryButton?.setAlpha(1.0, for: .normal)
+        retryButton?.setAlpha(0.3, for: .highlighted)
+        retryButton?.setTransformScale(1.0, for: .normal)
+        retryButton?.setTransformScale(0.95, for: .highlighted)
+        retryButton?.addTarget(self, action: #selector(retryButtonAction(_:)), for: .touchUpInside)
+        addSubview(self.retryButton!)
         
-        self.setNeedsLayout()
+        setNeedsLayout()
     }
     
     open func removeError() {
@@ -275,16 +266,17 @@ import AXStateButton
 
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
-	return input.rawValue
+    return input.rawValue
 }
 
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertToNSAttributedStringKeyDictionary(_ input: [String: Any]) -> [NSAttributedString.Key: Any] {
-	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+    return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }
 
 // Helper function inserted by Swift 4.2 migrator.
 fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
-	guard let input = input else { return nil }
-	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+    guard let input = input else { return nil }
+    return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }
+

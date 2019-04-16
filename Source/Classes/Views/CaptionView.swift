@@ -8,7 +8,7 @@
 
 import UIKit
 
-@objc(AXCaptionView) open class CaptionView: UIView, CaptionViewProtocol {
+@objc(AXCaptionView) internal class CaptionView: GradientView, CaptionViewProtocol {
     
     open weak var delegate: CaptionViewDelegate?
     
@@ -31,6 +31,7 @@ import UIKit
     
     fileprivate var isFirstLayout: Bool = true
     fileprivate var isBottomPadding = false
+    fileprivate var isFontSizingEnabled = false
     
     open var defaultTitleAttributes: [String: Any] {
         get {
@@ -42,7 +43,8 @@ import UIKit
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .body).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.bold)
+            let font =  UIFont(name: "Avenir-Heavy", size: 16) ??
+                                        UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.bold)
             let textColor = UIColor.white
             
             return [
@@ -62,8 +64,9 @@ import UIKit
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .body).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
-            let textColor = UIColor.lightGray
+            let font = UIFont(name: "Avenir-Medium", size: 14) ??
+                                        UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
+            let textColor = UIColor.white
             
             return [
                 convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
@@ -82,8 +85,9 @@ import UIKit
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .caption1).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
-            let textColor = UIColor.gray
+            let font = UIFont(name: "Avenir-Medium", size: 14) ??
+                                        UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
+            let textColor = UIColor.white
             
             return [
                 convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
@@ -106,7 +110,9 @@ import UIKit
 
         super.init(frame: .zero)
         
-        self.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        self.backgroundColor = .clear
+        self.startColor = .clear
+        self.endColor = UIColor.black.withAlphaComponent(0.5)
         
         self.titleSizingLabel.numberOfLines = 0
         self.descriptionSizingLabel.numberOfLines = 0
@@ -316,14 +322,17 @@ import UIKit
             
             return fontAdjustedAttributedString.copy() as? NSAttributedString
         }
-
-        self.titleSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.titleSizingLabel.attributedText,
-                                                                                fontTextStyle: .body)
-        self.descriptionSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.descriptionSizingLabel.attributedText,
-                                                                                      fontTextStyle: .body)
-        self.creditSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.creditSizingLabel.attributedText, 
-                                                                                 fontTextStyle: .caption1)
-        let bottomPadding: CGFloat = self.isBottomPadding ? 65 : 0
+        
+        if isFontSizingEnabled {
+            self.titleSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.titleSizingLabel.attributedText,
+                                                                                    fontTextStyle: .body)
+            self.descriptionSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.descriptionSizingLabel.attributedText,
+                                                                                          fontTextStyle: .body)
+            self.creditSizingLabel.attributedText = makeFontAdjustedAttributedString(for: self.creditSizingLabel.attributedText,
+                                                                                     fontTextStyle: .caption1)
+        }
+        
+        let bottomPadding: CGFloat = self.isBottomPadding ? 65 : 10
         let VerticalPadding: CGFloat = 10
         let HorizontalPadding: CGFloat = 15
         let InterLabelSpacing: CGFloat = 2

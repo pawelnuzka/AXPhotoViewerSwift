@@ -13,7 +13,7 @@ private var kvoContext: UInt8 = 1
 @objc(AXOverlayView) open class OverlayView: UIView, CaptionViewDelegate {
     
     /// The caption view to be used in the overlay.
-    open var captionView = CaptionView() {
+     var captionView = CaptionView() {
         didSet {
             oldValue.removeFromSuperview()
             self.captionView.delegate = self
@@ -132,7 +132,7 @@ private var kvoContext: UInt8 = 1
     
     /// The navigation bar used to set the `titleView`, `leftBarButtonItems`, `rightBarButtonItems`
     public let navigationBar = UINavigationBar()
-    public let navigationBarUnderlay = UIView()
+    let navigationBarUnderlay = GradientView()
     
     /// The underlying `UINavigationItem` used for setting the `titleView`, `leftBarButtonItems`, `rightBarButtonItems`.
     fileprivate var navigationItem = UINavigationItem()
@@ -149,8 +149,9 @@ private var kvoContext: UInt8 = 1
         self.captionView.delegate = self
         self.captionView.animateCaptionInfoChanges = true
         self.addSubview(self.captionView)
-        
-        self.navigationBarUnderlay.backgroundColor = self.captionView.backgroundColor
+
+        self.navigationBarUnderlay.backgroundColor = .clear
+        self.navigationBarUnderlay.startColor = UIColor.black.withAlphaComponent(0.5)
         self.addSubview(self.navigationBarUnderlay)
         
         self.navigationBar.backgroundColor = .clear
@@ -158,7 +159,10 @@ private var kvoContext: UInt8 = 1
         self.navigationBar.isTranslucent = true
         self.navigationBar.shadowImage = UIImage()
         self.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        self.navigationBar.titleTextAttributes = convertToOptionalNSAttributedStringKeyDictionary([NSAttributedString.Key.foregroundColor.rawValue: UIColor.white])
+        let font = UIFont(name: "Avenir-Heavy", size: 14) ?? UIFont.systemFont(ofSize: 14)
+        self.navigationBar.titleTextAttributes = convertToOptionalNSAttributedStringKeyDictionary(
+                                                        [NSAttributedString.Key.foregroundColor.rawValue: UIColor.white,
+                                                         NSAttributedString.Key.font.rawValue: font])
         self.navigationBar.items = [self.navigationItem]
         self.addSubview(self.navigationBar)
         
