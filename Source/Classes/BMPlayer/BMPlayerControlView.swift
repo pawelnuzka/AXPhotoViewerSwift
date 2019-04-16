@@ -34,7 +34,7 @@ import NVActivityIndicatorView
      - parameter slider:      progress slider
      - parameter event:       action
      */
-    func controlView(controlView: BMPlayerControlView, slider: UISlider, onSliderEvent event: UIControlEvents)
+    func controlView(controlView: BMPlayerControlView, slider: UISlider, onSliderEvent event: UIControl.Event)
     
     /**
      call when needs to change playback rate
@@ -74,7 +74,7 @@ open class BMPlayerControlView: UIView {
     open var maskImageView   = UIImageView()
     
     /// top views
-    open var backButton         = UIButton(type : UIButtonType.custom)
+    open var backButton         = UIButton(type : UIButton.ButtonType.custom)
     open var titleLabel         = UILabel()
     open var chooseDefitionView = UIView()
     
@@ -91,12 +91,12 @@ open class BMPlayerControlView: UIView {
     /* play button
      playButton.isSelected = player.isPlaying
      */
-    open var playButton       = UIButton(type: UIButtonType.custom)
+    open var playButton       = UIButton(type: UIButton.ButtonType.custom)
     
     /* fullScreen button
      fullScreenButton.isSelected = player.isFullscreen
      */
-    open var fullscreenButton = UIButton(type: UIButtonType.custom)
+    open var fullscreenButton = UIButton(type: UIButton.ButtonType.custom)
     
     open var subtitleLabel    = UILabel()
     open var subtitleBackView = UIView()
@@ -109,7 +109,7 @@ open class BMPlayerControlView: UIView {
     open var seekToViewImage  = UIImageView()
     open var seekToLabel      = UILabel()
     
-    open var replayButton     = UIButton(type: UIButtonType.custom)
+    open var replayButton     = UIButton(type: UIButton.ButtonType.custom)
     
     /// Gesture used to show / hide control view
     open var tapGesture: UITapGestureRecognizer!
@@ -352,9 +352,9 @@ open class BMPlayerControlView: UIView {
                 button.tag = i
             }
             
-            button.setTitle("\(resource.definitions[button.tag].definition)", for: UIControlState())
+            button.setTitle("\(resource.definitions[button.tag].definition)", for: UIControl.State())
             chooseDefitionView.addSubview(button)
-            button.addTarget(self, action: #selector(self.onDefinitionSelected(_:)), for: UIControlEvents.touchUpInside)
+            button.addTarget(self, action: #selector(self.onDefinitionSelected(_:)), for: UIControl.Event.touchUpInside)
             button.snp.makeConstraints({ (make) in
                 make.top.equalTo(chooseDefitionView.snp.top).offset(35 * i)
                 make.width.equalTo(50)
@@ -378,7 +378,7 @@ open class BMPlayerControlView: UIView {
      
      - parameter button: action Button
      */
-    open func onButtonPressed(_ button: UIButton) {
+    @objc open func onButtonPressed(_ button: UIButton) {
         autoFadeOutControlViewWithAnimation()
         if let type = ButtonType(rawValue: button.tag) {
             switch type {
@@ -398,7 +398,7 @@ open class BMPlayerControlView: UIView {
      
      - parameter gesture: tap gesture
      */
-    open func onTapGestureTapped(_ gesture: UITapGestureRecognizer) {
+    @objc open func onTapGestureTapped(_ gesture: UITapGestureRecognizer) {
         if playerLastState == .playedToTheEnd {
             return
         }
@@ -431,7 +431,7 @@ open class BMPlayerControlView: UIView {
         if let group = subtitle.search(for: time) {
             subtitleBackView.isHidden = false
             subtitleLabel.attributedText = NSAttributedString(string: group.text,
-                                                              attributes: subtileAttrabute)
+                                                              attributes: convertToOptionalNSAttributedStringKeyDictionary(subtileAttrabute))
         } else {
             subtitleBackView.isHidden = true
         }
@@ -550,13 +550,13 @@ open class BMPlayerControlView: UIView {
         timeSlider.minimumTrackTintColor = BMPlayerConf.tintColor
         
         timeSlider.addTarget(self, action: #selector(progressSliderTouchBegan(_:)),
-                             for: UIControlEvents.touchDown)
+                             for: UIControl.Event.touchDown)
         
         timeSlider.addTarget(self, action: #selector(progressSliderValueChanged(_:)),
-                             for: UIControlEvents.valueChanged)
+                             for: UIControl.Event.valueChanged)
         
         timeSlider.addTarget(self, action: #selector(progressSliderTouchEnded(_:)),
-                             for: [UIControlEvents.touchUpInside,UIControlEvents.touchCancel, UIControlEvents.touchUpOutside])
+                             for: [UIControl.Event.touchUpInside,UIControl.Event.touchCancel, UIControl.Event.touchUpOutside])
         
         progressView.tintColor      = UIColor ( red: 1.0, green: 1.0, blue: 1.0, alpha: 0.6 )
         progressView.trackTintColor = UIColor ( red: 1.0, green: 1.0, blue: 1.0, alpha: 0.3 )
@@ -728,4 +728,10 @@ open class BMPlayerControlView: UIView {
         let image  = UIImage(named: fileName, in: bundle, compatibleWith: nil)
         return image
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

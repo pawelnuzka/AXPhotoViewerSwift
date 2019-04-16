@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name            = "AXPhotoViewer"
-  s.version         = "1.2.19"
+  s.version         = "1.2.20"
   s.license         = { :type  => 'MIT', :file => 'LICENSE.md' }
   s.summary         = "An iPhone/iPad photo gallery viewer, useful for viewing a large number of photos."
   s.homepage        = "https://github.com/alexhillc/AXPhotoViewer"
@@ -9,15 +9,17 @@ Pod::Spec.new do |s|
 
   s.platform        = :ios, '9.0'
   s.requires_arc    = true
+  s.pod_target_xcconfig = { 'SWIFT_VERSION' => '4.2' }
+
 
   s.default_subspec = 'Lite'
 
   s.subspec 'Core' do |cs|
-    cs.dependency      'AXStateButton', '>= 1.1.2'
-    cs.dependency      'FLAnimatedImage', '>= 1.0.0'
-    cs.dependency 	   'SnapKit', '~> 3.2'
-    cs.dependency 	   'NVActivityIndicatorView', '~> 3.5'
-    cs.dependency 	   'VIMediaCache'
+    cs.dependency	'AXStateButton'
+    cs.dependency	'FLAnimatedImage'
+    cs.dependency	'SnapKit'
+    cs.dependency 	'NVActivityIndicatorView'
+    cs.dependency	'VIMediaCache'
     cs.resources     = 'Assets/*.{xcassets}'
     cs.source_files  = 'Source/*.{swift,h,m}',
                        'Source/Classes/**/*.{swift,h,m}',

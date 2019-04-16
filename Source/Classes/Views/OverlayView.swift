@@ -83,10 +83,10 @@ private var kvoContext: UInt8 = 1
     /// The title text attributes inherited by the `title`.
     public var titleTextAttributes: [String: Any]? {
         set(value) {
-            self.navigationBar.titleTextAttributes = value
+            self.navigationBar.titleTextAttributes = convertToOptionalNSAttributedStringKeyDictionary(value)
         }
         get {
-            return self.navigationBar.titleTextAttributes
+            return convertFromOptionalNSAttributedStringKeyDictionary(self.navigationBar.titleTextAttributes)
         }
     }
     
@@ -131,8 +131,8 @@ private var kvoContext: UInt8 = 1
     }
     
     /// The navigation bar used to set the `titleView`, `leftBarButtonItems`, `rightBarButtonItems`
-    open let navigationBar = UINavigationBar()
-    open let navigationBarUnderlay = UIView()
+    public let navigationBar = UINavigationBar()
+    public let navigationBarUnderlay = UIView()
     
     /// The underlying `UINavigationItem` used for setting the `titleView`, `leftBarButtonItems`, `rightBarButtonItems`.
     fileprivate var navigationItem = UINavigationItem()
@@ -148,11 +148,9 @@ private var kvoContext: UInt8 = 1
         
         self.captionView.delegate = self
         self.captionView.animateCaptionInfoChanges = true
-        if let captionView = self.captionView as? UIView {
-            self.addSubview(captionView)
-        }
+        self.addSubview(self.captionView)
         
-        self.navigationBarUnderlay.backgroundColor = (self.captionView as? UIView)?.backgroundColor
+        self.navigationBarUnderlay.backgroundColor = self.captionView.backgroundColor
         self.addSubview(self.navigationBarUnderlay)
         
         self.navigationBar.backgroundColor = .clear
@@ -160,11 +158,11 @@ private var kvoContext: UInt8 = 1
         self.navigationBar.isTranslucent = true
         self.navigationBar.shadowImage = UIImage()
         self.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        self.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.white]
+        self.navigationBar.titleTextAttributes = convertToOptionalNSAttributedStringKeyDictionary([NSAttributedString.Key.foregroundColor.rawValue: UIColor.white])
         self.navigationBar.items = [self.navigationItem]
         self.addSubview(self.navigationBar)
         
-        NotificationCenter.default.addObserver(forName: .UIContentSizeCategoryDidChange, object: nil, queue: .main) { [weak self] (note) in
+        NotificationCenter.default.addObserver(forName: UIContentSizeCategory.didChangeNotification, object: nil, queue: .main) { [weak self] (note) in
             self?.setNeedsLayout()
         }
     }
@@ -193,11 +191,10 @@ private var kvoContext: UInt8 = 1
                                                   size: CGSize(width: self.frame.size.width,
                                                                height: self.navigationBar.frame.origin.y + self.navigationBar.frame.size.height))
         
-        if let captionView = self.captionView as? UIView {
-            let captionViewSize = captionView.sizeThatFits(insetSize)
-            let captionViewOrigin = CGPoint(x: self.contentInset.left, y: self.frame.size.height - self.contentInset.bottom - captionViewSize.height)
-            captionView.frame = CGRect(origin: captionViewOrigin, size: captionViewSize)
-        }
+        let captionViewSize = captionView.sizeThatFits(insetSize)
+        let captionViewOrigin = CGPoint(x: self.contentInset.left, y: self.frame.size.height - self.contentInset.bottom - captionViewSize.height)
+        self.captionView.frame = CGRect(origin: captionViewOrigin, size: captionViewSize)
+        
         
         self.isFirstLayout = false
     }
@@ -269,3 +266,15 @@ private var kvoContext: UInt8 = 1
     }
 }
 
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromOptionalNSAttributedStringKeyDictionary(_ input: [NSAttributedString.Key: Any]?) -> [String: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}

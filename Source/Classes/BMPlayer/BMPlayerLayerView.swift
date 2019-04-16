@@ -73,9 +73,9 @@ open class BMPlayerLayerView: UIView {
     }()
     
     
-    open var videoGravity = AVLayerVideoGravityResizeAspect {
+    open var videoGravity = convertFromAVLayerVideoGravity(AVLayerVideoGravity.resizeAspect) {
         didSet {
-            self.playerLayer?.videoGravity = videoGravity
+            self.playerLayer?.videoGravity = convertToAVLayerVideoGravity(videoGravity)
         }
     }
     
@@ -174,15 +174,15 @@ open class BMPlayerLayerView: UIView {
         super.layoutSubviews()
         switch self.aspectRatio {
         case .default:
-            self.playerLayer?.videoGravity = "AVLayerVideoGravityResizeAspect"
+            self.playerLayer?.videoGravity = convertToAVLayerVideoGravity("AVLayerVideoGravityResizeAspect")
             self.playerLayer?.frame  = self.bounds
             break
         case .sixteen2NINE:
-            self.playerLayer?.videoGravity = "AVLayerVideoGravityResize"
+            self.playerLayer?.videoGravity = convertToAVLayerVideoGravity("AVLayerVideoGravityResize")
             self.playerLayer?.frame = CGRect(x: 0, y: 0, width: self.bounds.width, height: self.bounds.width/(16/9))
             break
         case .four2THREE:
-            self.playerLayer?.videoGravity = "AVLayerVideoGravityResize"
+            self.playerLayer?.videoGravity = convertToAVLayerVideoGravity("AVLayerVideoGravityResize")
             let _w = self.bounds.height * 4 / 3
             self.playerLayer?.frame = CGRect(x: (self.bounds.width - _w )/2, y: 0, width: _w, height: self.bounds.height)
             break
@@ -213,7 +213,7 @@ open class BMPlayerLayerView: UIView {
     }
     
     open func onTimeSliderBegan() {
-        if self.player?.currentItem?.status == AVPlayerItemStatus.readyToPlay {
+        if self.player?.currentItem?.status == AVPlayerItem.Status.readyToPlay {
             self.timer?.fireDate = Date.distantFuture
         }
     }
@@ -223,9 +223,9 @@ open class BMPlayerLayerView: UIView {
             return
         }
         setupTimer()
-        if self.player?.currentItem?.status == AVPlayerItemStatus.readyToPlay {
-            let draggedTime = CMTimeMake(Int64(secounds), 1)
-            self.player!.seek(to: draggedTime, toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero, completionHandler: { (finished) in
+        if self.player?.currentItem?.status == AVPlayerItem.Status.readyToPlay {
+            let draggedTime = CMTimeMake(value: Int64(secounds), timescale: 1)
+            self.player!.seek(to: draggedTime, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero, completionHandler: { (finished) in
                 completion?()
             })
         } else {
@@ -280,7 +280,7 @@ open class BMPlayerLayerView: UIView {
         
         playerLayer?.removeFromSuperlayer()
         playerLayer = AVPlayerLayer(player: player)
-        playerLayer!.videoGravity = videoGravity
+        playerLayer!.videoGravity = convertToAVLayerVideoGravity(videoGravity)
         
         layer.addSublayer(playerLayer!)
         
@@ -358,7 +358,7 @@ open class BMPlayerLayerView: UIView {
             if item == self.playerItem {
                 switch keyPath {
                 case "status":
-                    if player?.status == AVPlayerStatus.readyToPlay {
+                    if player?.status == AVPlayer.Status.readyToPlay {
                         self.state = .buffering
                         if shouldSeekTo != 0 {
                             print("BMPlayerLayer | Should seek to \(shouldSeekTo)")
@@ -371,7 +371,7 @@ open class BMPlayerLayerView: UIView {
                             self.hasReadyToPlay = true
                             self.state = .readyToPlay
                         }
-                    } else if player?.status == AVPlayerStatus.failed {
+                    } else if player?.status == AVPlayer.Status.failed {
                         self.state = .error
                     }
                     
@@ -453,4 +453,14 @@ open class BMPlayerLayerView: UIView {
             }
         }
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromAVLayerVideoGravity(_ input: AVLayerVideoGravity) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToAVLayerVideoGravity(_ input: String) -> AVLayerVideoGravity {
+	return AVLayerVideoGravity(rawValue: input)
 }

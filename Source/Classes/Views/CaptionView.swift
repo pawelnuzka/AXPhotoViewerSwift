@@ -42,12 +42,12 @@ import UIKit
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .body).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFontWeightBold)
+            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.bold)
             let textColor = UIColor.white
             
             return [
-                NSFontAttributeName: font,
-                NSForegroundColorAttributeName: textColor
+                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
+                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
             ]
         }
     }
@@ -62,12 +62,12 @@ import UIKit
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .body).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFontWeightLight)
+            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
             let textColor = UIColor.lightGray
             
             return [
-                NSFontAttributeName: font,
-                NSForegroundColorAttributeName: textColor
+                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
+                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
             ]
         }
     }
@@ -82,12 +82,12 @@ import UIKit
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .caption1).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFontWeightLight)
+            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
             let textColor = UIColor.gray
             
             return [
-                NSFontAttributeName: font,
-                NSForegroundColorAttributeName: textColor
+                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
+                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
             ]
         }
     }
@@ -124,7 +124,7 @@ import UIKit
         self.creditLabel.numberOfLines = 0
         self.addSubview(self.creditLabel)
         
-        NotificationCenter.default.addObserver(forName: .UIContentSizeCategoryDidChange, object: nil, queue: .main) { [weak self] (note) in
+        NotificationCenter.default.addObserver(forName: UIContentSizeCategory.didChangeNotification, object: nil, queue: .main) { [weak self] (note) in
             self?.setNeedsLayout()
         }
     }
@@ -161,7 +161,7 @@ import UIKit
                 return attributedString
             }
             
-            defaultAttributedString.addAttributes(defaults, range: NSMakeRange(0, defaultAttributedString.length))
+            defaultAttributedString.addAttributes(convertToNSAttributedStringKeyDictionary(defaults), range: NSMakeRange(0, defaultAttributedString.length))
             return defaultAttributedString
         }
         
@@ -289,12 +289,12 @@ import UIKit
     }
     
     @discardableResult fileprivate func computeSize(for constrainedSize: CGSize, applySizingLayout: Bool) -> CGSize {
-        func makeFontAdjustedAttributedString(for attributedString: NSAttributedString?, fontTextStyle: UIFontTextStyle) -> NSAttributedString? {
+        func makeFontAdjustedAttributedString(for attributedString: NSAttributedString?, fontTextStyle: UIFont.TextStyle) -> NSAttributedString? {
             guard let fontAdjustedAttributedString = attributedString?.mutableCopy() as? NSMutableAttributedString else {
                 return attributedString
             }
             
-            fontAdjustedAttributedString.enumerateAttribute(NSFontAttributeName,
+            fontAdjustedAttributedString.enumerateAttribute(NSAttributedString.Key.font,
                                                             in: NSMakeRange(0, fontAdjustedAttributedString.length),
                                                             options: [], using: { [weak self] (value, range, stop) in
                 guard let oldFont = value as? UIFont else {
@@ -310,8 +310,8 @@ import UIKit
                 }
                                                                 
                 let newFont = oldFont.withSize(newFontDescriptor.pointSize)
-                fontAdjustedAttributedString.removeAttribute(NSFontAttributeName, range: range)
-                fontAdjustedAttributedString.addAttribute(NSFontAttributeName, value: newFont, range: range)
+                fontAdjustedAttributedString.removeAttribute(NSAttributedString.Key.font, range: range)
+                fontAdjustedAttributedString.addAttribute(NSAttributedString.Key.font, value: newFont, range: range)
             })
             
             return fontAdjustedAttributedString.copy() as? NSAttributedString
@@ -358,4 +358,14 @@ import UIKit
         return CGSize(width: constrainedSize.width, height: yOffset)
     }
 
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSAttributedStringKeyDictionary(_ input: [String: Any]) -> [NSAttributedString.Key: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

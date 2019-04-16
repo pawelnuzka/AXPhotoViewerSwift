@@ -61,7 +61,7 @@ fileprivate let ZoomScaleEpsilon: CGFloat = 0.01
         self.showsHorizontalScrollIndicator = false
         self.isScrollEnabled = false
         self.bouncesZoom = true
-        self.decelerationRate = UIScrollViewDecelerationRateFast;
+        self.decelerationRate = UIScrollView.DecelerationRate.fast;
         self.delegate = self
     }
     

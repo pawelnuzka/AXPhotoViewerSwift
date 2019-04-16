@@ -10,7 +10,7 @@ import AXStateButton
 
 @objc(AXLoadingView) open class LoadingView: UIView, LoadingViewProtocol {
     
-    open fileprivate(set) lazy var indicatorView: UIView = UIActivityIndicatorView(activityIndicatorStyle: .white)
+    open fileprivate(set) lazy var indicatorView: UIView = UIActivityIndicatorView(style: .white)
     
     open fileprivate(set) var errorImageView: UIImageView?
     
@@ -42,12 +42,12 @@ import AXStateButton
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .body).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFontWeightLight)
+            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
             let textColor = UIColor.white
             
             return [
-                NSFontAttributeName: font,
-                NSForegroundColorAttributeName: textColor
+                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
+                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
             ]
         }
     }
@@ -70,12 +70,12 @@ import AXStateButton
                 fontDescriptor = UIFont.preferredFont(forTextStyle: .caption1).fontDescriptor
             }
             
-            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFontWeightLight)
+            let font = UIFont.systemFont(ofSize: fontDescriptor.pointSize, weight: UIFont.Weight.light)
             let textColor = UIColor.white
             
             return [
-                NSFontAttributeName: font,
-                NSForegroundColorAttributeName: textColor
+                convertFromNSAttributedStringKey(NSAttributedString.Key.font): font,
+                convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor): textColor
             ]
         }
     }
@@ -85,7 +85,7 @@ import AXStateButton
     public init() {
         super.init(frame: .zero)
         
-        NotificationCenter.default.addObserver(forName: .UIContentSizeCategoryDidChange, object: nil, queue: .main) { [weak self] (note) in
+        NotificationCenter.default.addObserver(forName: UIContentSizeCategory.didChangeNotification, object: nil, queue: .main) { [weak self] (note) in
             self?.setNeedsLayout()
         }
     }
@@ -114,7 +114,7 @@ import AXStateButton
             }
             
             newAttributedString.setAttributes(nil, range: NSMakeRange(0, newAttributedString.length))
-            newAttributedString.addAttributes(attributes, range: NSMakeRange(0, newAttributedString.length))
+            newAttributedString.addAttributes(convertToNSAttributedStringKeyDictionary(attributes), range: NSMakeRange(0, newAttributedString.length))
             
             return newAttributedString.copy() as? NSAttributedString
         }
@@ -223,16 +223,16 @@ import AXStateButton
         }
         
         self.errorLabel = UILabel()
-        self.errorLabel?.attributedText = NSAttributedString(string: self.errorText, attributes: self.errorAttributes)
+        self.errorLabel?.attributedText = NSAttributedString(string: self.errorText, attributes: convertToOptionalNSAttributedStringKeyDictionary(self.errorAttributes))
         self.errorLabel?.textAlignment = .center
         self.errorLabel?.numberOfLines = 3
         self.errorLabel?.textColor = .white
         self.addSubview(self.errorLabel!)
         
         self.retryButton = StateButton()
-        self.retryButton?.controlStateAnimationTimingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+        self.retryButton?.controlStateAnimationTimingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
         self.retryButton?.controlStateAnimationDuration = 0.1
-        self.retryButton?.setAttributedTitle(NSAttributedString(string: self.retryText, attributes: self.retryAttributes),
+        self.retryButton?.setAttributedTitle(NSAttributedString(string: self.retryText, attributes: convertToOptionalNSAttributedStringKeyDictionary(self.retryAttributes)),
                                              for: .normal)
         self.retryButton?.setBorderWidth(1.0, for: .normal)
         self.retryButton?.setBorderColor(.white, for: .normal)
@@ -271,4 +271,20 @@ import AXStateButton
         self.retryHandler = nil
     }
     
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromNSAttributedStringKey(_ input: NSAttributedString.Key) -> String {
+	return input.rawValue
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToNSAttributedStringKeyDictionary(_ input: [String: Any]) -> [NSAttributedString.Key: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToOptionalNSAttributedStringKeyDictionary(_ input: [String: Any]?) -> [NSAttributedString.Key: Any]? {
+	guard let input = input else { return nil }
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (NSAttributedString.Key(rawValue: key), value)})
 }

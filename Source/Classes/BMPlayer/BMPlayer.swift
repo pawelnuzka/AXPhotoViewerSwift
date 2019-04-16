@@ -39,9 +39,9 @@ open class BMPlayer: UIView {
     open var panGesture: UIPanGestureRecognizer!
     
     /// AVLayerVideoGravityType
-    open var videoGravity = AVLayerVideoGravityResizeAspect {
+    open var videoGravity = convertFromAVLayerVideoGravity(AVLayerVideoGravity.resizeAspect) {
         didSet {
-            self.playerLayer?.videoGravity = videoGravity
+            self.playerLayer?.videoGravity = AVLayerVideoGravity(rawValue: videoGravity).rawValue
         }
     }
     
@@ -241,7 +241,7 @@ open class BMPlayer: UIView {
      
      - return: costom control which you want to use
      */
-    class open func storyBoardCustomControl() -> BMPlayerControlView? {
+     @objc class func storyBoardCustomControl() -> BMPlayerControlView? {
         return nil
     }
     
@@ -261,10 +261,10 @@ open class BMPlayer: UIView {
         
         // 判断是垂直移动还是水平移动
         switch pan.state {
-        case UIGestureRecognizerState.began:
+        case UIGestureRecognizer.State.began:
             // 使用绝对值来判断移动的方向
-            let x = fabs(velocityPoint.x)
-            let y = fabs(velocityPoint.y)
+            let x = abs(velocityPoint.x)
+            let y = abs(velocityPoint.y)
             
             if x > y {
                 self.panDirection = BMPanDirection.horizontal
@@ -284,7 +284,7 @@ open class BMPlayer: UIView {
                 }
             }
             
-        case UIGestureRecognizerState.changed:
+        case UIGestureRecognizer.State.changed:
             switch self.panDirection {
             case BMPanDirection.horizontal:
                 self.horizontalMoved(velocityPoint.x)
@@ -292,7 +292,7 @@ open class BMPlayer: UIView {
                 self.verticalMoved(velocityPoint.y)
             }
             
-        case UIGestureRecognizerState.ended:
+        case UIGestureRecognizer.State.ended:
             // 移动结束也需要判断垂直或者平移
             // 比如水平移动结束时，要快进到指定位置，如果这里没有判断，当我们调节音量完之后，会出现屏幕跳动的bug
             switch (self.panDirection) {
@@ -374,7 +374,7 @@ open class BMPlayer: UIView {
     deinit {
         playerLayer?.pause()
         playerLayer?.prepareToDeinit()
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIApplicationDidChangeStatusBarOrientation, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
     }
     
     
@@ -439,7 +439,7 @@ open class BMPlayer: UIView {
     }
     
     fileprivate func initUIData() {
-        NotificationCenter.default.addObserver(self, selector: #selector(self.onOrientationChanged), name: NSNotification.Name.UIApplicationDidChangeStatusBarOrientation, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.onOrientationChanged), name: UIApplication.didChangeStatusBarOrientationNotification, object: nil)
     }
     
     fileprivate func configureVolume() {
@@ -453,7 +453,7 @@ open class BMPlayer: UIView {
     
     fileprivate func preparePlayer() {
         playerLayer = BMPlayerLayerView()
-        playerLayer!.videoGravity = videoGravity
+        playerLayer!.videoGravity = AVLayerVideoGravity(rawValue: videoGravity).rawValue
         insertSubview(playerLayer!, at: 0)
         playerLayer!.snp.makeConstraints { (make) in
             make.edges.equalTo(self)
@@ -589,13 +589,13 @@ extension BMPlayer: BMPlayerControlViewDelegate {
     
     public func controlView(controlView: BMPlayerControlView,
                             slider: UISlider,
-                            onSliderEvent event: UIControlEvents) {
+                            onSliderEvent event: UIControl.Event) {
         switch event {
-        case UIControlEvents.touchDown:
+        case UIControl.Event.touchDown:
             playerLayer?.onTimeSliderBegan()
             isSliderSliding = true
             
-        case UIControlEvents.touchUpInside :
+        case UIControl.Event.touchUpInside :
             isSliderSliding = false
             let target = self.totalDuration * Double(slider.value)
             
@@ -622,4 +622,9 @@ extension BMPlayer: BMPlayerControlViewDelegate {
     public func controlView(controlView: BMPlayerControlView, didChangeVideoPlaybackRate rate: Float) {
         self.playerLayer?.player?.rate = rate
     }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromAVLayerVideoGravity(_ input: AVLayerVideoGravity) -> String {
+	return input.rawValue
 }

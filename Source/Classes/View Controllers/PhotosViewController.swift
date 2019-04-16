@@ -16,7 +16,7 @@ import MobileCoreServices
     open weak var delegate: PhotosViewControllerDelegate?
     
     /// The underlying `OverlayView` that is used for displaying photo captions, titles, and actions.
-    open let overlayView = OverlayView()
+    public let overlayView = OverlayView()
     
     /// Gesture Recognizer for catching swipe gestures on caption view and blocking page swiping
     let preventPageSwipeGestureRecognizer = UIPanGestureRecognizer(target: self, action: nil)
@@ -68,13 +68,13 @@ import MobileCoreServices
         }
     }
     
-    open var automaticSlideshowLoopEnabled = false
+    public var automaticSlideshowLoopEnabled = false
 
-    open let automaticSlideshow = AutomaticSlideshow()
+    public let automaticSlideshow = AutomaticSlideshow()
 
     open var slideshowBarButtonItem: UIBarButtonItem {
         get {
-            let type = automaticSlideshow.isPlaying ? UIBarButtonSystemItem.pause : UIBarButtonSystemItem.play
+            let type = automaticSlideshow.isPlaying ? UIBarButtonItem.SystemItem.pause : UIBarButtonItem.SystemItem.play
             let button = UIBarButtonItem(barButtonSystemItem: type, target: self, action: #selector(slideshowAction(_:)))
             let topImageOffset: CGFloat = 4.0
             button.imageInsets = UIEdgeInsets(top: topImageOffset, left: 0, bottom: 0, right: 0)
@@ -331,7 +331,7 @@ import MobileCoreServices
         
         self.pageViewController = UIPageViewController(transitionStyle: .scroll,
                                                        navigationOrientation: self.pagingConfig.navigationOrientation,
-                                                       options: [UIPageViewControllerOptionInterPageSpacingKey: self.pagingConfig.interPhotoSpacing])
+                                                       options: [UIPageViewController.OptionsKey.interPageSpacing: self.pagingConfig.interPhotoSpacing])
     }
     
    
@@ -373,9 +373,9 @@ import MobileCoreServices
             self.singleTapGestureRecognizer.addTarget(self, action: #selector(singleTapAction(_:)))
             self.pageViewController.view.addGestureRecognizer(self.singleTapGestureRecognizer)
             
-            self.addChildViewController(self.pageViewController)
+            self.addChild(self.pageViewController)
             self.view.addSubview(self.pageViewController.view)
-            self.pageViewController.didMove(toParentViewController: self)
+            self.pageViewController.didMove(toParent: self)
             
             self.configureInitialPageViewController()
             self.configurePreventPageSwipeGestureRecognizer()
@@ -427,8 +427,8 @@ import MobileCoreServices
                                                      right: 0)
     }
     
-    open override func didMove(toParentViewController parent: UIViewController?) {
-        super.didMove(toParentViewController: parent)
+    open override func didMove(toParent parent: UIViewController?) {
+        super.didMove(toParent: parent)
         
         if parent is UINavigationController {
             assertionFailure("Do not embed `PhotosViewController` in a navigation stack.")
@@ -924,7 +924,7 @@ import MobileCoreServices
     ///   - photo: The related `Photo`.
     /// - Note: This is only called for the default action.
     @objc(actionCompletedWithActivityType:forPhoto:)
-    open func actionCompleted(activityType: UIActivityType, for photo: PhotoProtocol) {
+    open func actionCompleted(activityType: UIActivity.ActivityType, for photo: PhotoProtocol) {
         self.delegate?.photosViewController?(self, actionCompletedWith: activityType, for: photo)
     }
     
@@ -1073,7 +1073,7 @@ extension PhotosViewController : UIGestureRecognizerDelegate {
     /// - Note: This is only called for the default action.
     @objc(photosViewController:actionCompletedWithActivityType:forPhoto:)
     optional func photosViewController(_ photosViewController: PhotosViewController, 
-                                       actionCompletedWith activityType: UIActivityType,
+                                       actionCompletedWith activityType: UIActivity.ActivityType,
                                        for photo: PhotoProtocol)
     
 }

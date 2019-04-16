@@ -217,7 +217,7 @@ import FLAnimatedImage
         if let from = from as? PhotosViewController {
             photosViewController = from
         } else {
-            guard let childViewController = from.childViewControllers.filter({ $0 is PhotosViewController }).first as? PhotosViewController else {
+            guard let childViewController = from.children.filter({ $0 is PhotosViewController }).first as? PhotosViewController else {
                 assertionFailure("Could not find AXPhotosViewController in container's children.")
                 return
             }
@@ -328,7 +328,7 @@ import FLAnimatedImage
             from.view.alpha = 0
         }
         
-        var scaleAnimationOptions: UIViewAnimationOptions
+        var scaleAnimationOptions: UIView.AnimationOptions
         var scaleInitialSpringVelocity: CGFloat
         
         if self.canPerformContextualDismissal() {
@@ -391,7 +391,7 @@ import FLAnimatedImage
         if let from = from as? PhotosViewController {
             photosViewController = from
         } else {
-            guard let childViewController = from.childViewControllers.filter({ $0 is PhotosViewController }).first as? PhotosViewController else {
+            guard let childViewController = from.children.filter({ $0 is PhotosViewController }).first as? PhotosViewController else {
                 assertionFailure("Could not find AXPhotosViewController in container's children.")
                 return
             }
@@ -413,7 +413,7 @@ import FLAnimatedImage
             imageView.center.y = uSelf.imageViewInitialCenter.y
             overlayView.navigationBar.frame.origin.y = uSelf.navigationBarInitialOriginY
             overlayView.navigationBarUnderlay.frame.origin.y = uSelf.navigationBarUnderlayInitialOriginY
-            (overlayView.captionView as? UIView)?.frame.origin.y = uSelf.captionViewInitialOriginY
+            overlayView.captionView.frame.origin.y = uSelf.captionViewInitialOriginY
             
             to.view.alpha = 0
         }
@@ -483,7 +483,7 @@ import FLAnimatedImage
         if let from = from as? PhotosViewController {
             photosViewController = from
         } else {
-            guard let childViewController = from.childViewControllers.filter({ $0 is PhotosViewController }).first as? PhotosViewController else {
+            guard let childViewController = from.children.filter({ $0 is PhotosViewController }).first as? PhotosViewController else {
                 assertionFailure("Could not find AXPhotosViewController in container's children.")
                 return
             }
@@ -531,7 +531,7 @@ import FLAnimatedImage
         
         self.navigationBarInitialOriginY = overlayView.navigationBar.frame.origin.y
         self.navigationBarUnderlayInitialOriginY = overlayView.navigationBarUnderlay.frame.origin.y
-        self.captionViewInitialOriginY = (overlayView.captionView as? UIView)?.frame.origin.y ?? 0
+        self.captionViewInitialOriginY = overlayView.captionView.frame.origin.y
         
         from.view.alpha = 0
         
@@ -592,7 +592,7 @@ import FLAnimatedImage
                     let to = transitionContext.viewController(forKey: .to),
                     let navigationBar = uSelf.overlayView?.navigationBar,
                     let navigationBarUnderlay = uSelf.overlayView?.navigationBarUnderlay,
-                    let captionView = uSelf.overlayView?.captionView as? UIView else {
+                    let captionView = uSelf.overlayView?.captionView else {
                         assertionFailure("No. ಠ_ಠ")
                         return
                 }
@@ -639,7 +639,7 @@ import FLAnimatedImage
                     let transitionContext = uSelf.dismissalTransitionContext,
                     let _ = uSelf.overlayView?.navigationBar,
                     let _ = uSelf.overlayView?.navigationBarUnderlay,
-                    let _ = uSelf.overlayView?.captionView as? UIView else {
+                    let _ = uSelf.overlayView?.captionView else {
                         return
                 }
                 

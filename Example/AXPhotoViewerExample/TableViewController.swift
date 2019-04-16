@@ -174,7 +174,7 @@ class TableViewController: UITableViewController, PhotosViewControllerDelegate, 
             return cell.contentView.viewWithTag(666) as? FLAnimatedImageView
         }
         
-        let container = UIViewController()
+//        let container = UIViewController()
         
         let dataSource = PhotosDataSource(photos: self.photos, initialPhotoIndex: indexPath.row)
         let pagingConfig = PagingConfig(loadingViewClass: CustomLoadingView.self)
