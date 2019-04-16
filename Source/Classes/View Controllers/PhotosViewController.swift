@@ -564,7 +564,7 @@ import MobileCoreServices
         self.willUpdate(overlayView: self.overlayView, for: photo, at: photoIndex, totalNumberOfPhotos: self.dataSource.numberOfPhotos)
         
         if self.dataSource.numberOfPhotos > 1 {
-            self.overlayView.internalTitle = NSLocalizedString("\(photoIndex + 1) of \(self.dataSource.numberOfPhotos)", comment: "")
+            self.overlayView.internalTitle = NSLocalizedString("\(photoIndex + 1) OF \(self.dataSource.numberOfPhotos)", comment: "")
         } else {
             self.overlayView.internalTitle = nil
         }
