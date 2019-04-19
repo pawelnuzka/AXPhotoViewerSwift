@@ -10,8 +10,10 @@ import UIKit
 import MobileCoreServices
 
 @objc(AXPhotosViewController) open class PhotosViewController: UIViewController, UIPageViewControllerDelegate, UIPageViewControllerDataSource,
-                                                               UIViewControllerTransitioningDelegate, PhotoViewControllerDelegate, NetworkIntegrationDelegate,
-                                                               PhotosTransitionControllerDelegate {
+                                                               UIViewControllerTransitioningDelegate, PhotoViewControllerDelegate, NetworkIntegrationDelegate, UIScrollViewDelegate,
+PhotosTransitionControllerDelegate, ZoomingEventViewDelegate {
+
+    
     
     open weak var delegate: PhotosViewControllerDelegate?
     
@@ -62,25 +64,28 @@ import MobileCoreServices
     /// The action bar button item that is initially set in the overlay's navigation bar. Any 'target' or 'action' provided to this button will be overwritten.
     /// Overriding this is purely for customizing the look and feel of the button.
     /// Alternatively, you may create your own `UIBarButtonItem`s and directly set them _and_ their actions on the `overlayView` property.
-    open var actionBarButtonItem: UIBarButtonItem {
-        get {
-            return UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareAction(_:)))
-        }
-    }
+    open var actionBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareAction(_:)))
     
-    public var automaticSlideshowLoopEnabled = false
-
-    public let automaticSlideshow = AutomaticSlideshow()
-
-    open var slideshowBarButtonItem: UIBarButtonItem {
-        get {
-            let type = automaticSlideshow.isPlaying ? UIBarButtonItem.SystemItem.pause : UIBarButtonItem.SystemItem.play
+    let slideshowBarButtonPauseItem: UIBarButtonItem = {
+         let type = UIBarButtonItem.SystemItem.pause
             let button = UIBarButtonItem(barButtonSystemItem: type, target: self, action: #selector(slideshowAction(_:)))
             let topImageOffset: CGFloat = 4.0
             button.imageInsets = UIEdgeInsets(top: topImageOffset, left: 0, bottom: 0, right: 0)
             return button
-        }
-    }
+    }()
+
+    let slideshowBarButtonPlayItem: UIBarButtonItem = {
+         let type = UIBarButtonItem.SystemItem.play
+            let button = UIBarButtonItem(barButtonSystemItem: type, target: self, action: #selector(slideshowAction(_:)))
+            let topImageOffset: CGFloat = 4.0
+            button.imageInsets = UIEdgeInsets(top: topImageOffset, left: 0, bottom: 0, right: 0)
+            return button
+    }()
+
+    public var automaticSlideshowLoopEnabled = false
+
+    public let automaticSlideshow = AutomaticSlideshow()
+
 
     /// The `TransitionInfo` passed in at initialization. This object is used to define functionality for the presentation and dismissal
     /// of the `PhotosViewController`.
@@ -576,17 +581,20 @@ import MobileCoreServices
         self.updateBarButtons(for: photoIndex)
     }
     
-    private func updateBarButtons(for photoIndex: Int){
+    private func updateBarButtons(for photoIndex: Int) {
         guard let photo = self.dataSource.photo(at: photoIndex) else {
             return
         }
-
+  
+       let slideshowBarButtonItem = automaticSlideshow.isPlaying ?
+                                                                slideshowBarButtonPauseItem : slideshowBarButtonPlayItem
         if (photo.isVideo && !photo.isDownloaded) {
             self.overlayView.rightBarButtonItems = [slideshowBarButtonItem]
-        }else {
+        } else {
             self.overlayView.rightBarButtonItems = [actionBarButtonItem, slideshowBarButtonItem]
         }
     }
+
     
     @objc fileprivate func singleTapAction(_ sender: UITapGestureRecognizer) {
         let show = (self.overlayView.alpha == 0)
@@ -646,7 +654,9 @@ import MobileCoreServices
             }
         }
         
-        activityViewController.popoverPresentationController?.barButtonItem = barButtonItem
+        stopAutomaticSlideshow() //reloaded bar buttons, param barButtonItem is out-of-date
+        
+        activityViewController.popoverPresentationController?.barButtonItem = self.overlayView.rightBarButtonItems?.first
         self.present(activityViewController, animated: true)
     }
     
@@ -724,10 +734,23 @@ import MobileCoreServices
         photoViewController.delegate = self
         
         self.singleTapGestureRecognizer.require(toFail: photoViewController.zoomingImageView.doubleTapGestureRecognizer)
+        
+        photoViewController.zoomingImageView.zoomEventDelegate = self
     
         photoViewController.pageIndex = pageIndex
         photoViewController.applyPhoto(photo)
         return photoViewController
+    }
+    
+    func scrollViewWillBeginZooming(_ zoomingImageView: ZoomingImageView) {
+        stopAutomaticSlideshow()
+    }
+    
+    func stopAutomaticSlideshow() {
+        if automaticSlideshow.isPlaying {
+            automaticSlideshow.stop()
+            updateBarButtons(for: self.currentPhotoIndex)
+        }
     }
     
     fileprivate func makeLoadingView(for pageIndex: Int) -> LoadingViewProtocol? {
@@ -749,6 +772,11 @@ import MobileCoreServices
 
         self.currentPhotoViewController?.isTransitioning = true
         isViewTransitioning = true
+        
+        if self.currentPhotoIndex > viewController.pageIndex {
+            stopAutomaticSlideshow()
+        }
+        
         previousPhotoIndex = self.currentPhotoIndex
         self.currentPhotoIndex = viewController.pageIndex
         self.loadPhotos(at: viewController.pageIndex)

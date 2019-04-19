@@ -14,6 +14,7 @@ fileprivate let ZoomScaleEpsilon: CGFloat = 0.01
 @objc(AXZoomingImageView) class ZoomingImageView: UIScrollView, UIScrollViewDelegate {
     
     weak var zoomScaleDelegate: ZoomingImageViewDelegate?
+    weak var zoomEventDelegate: ZoomingEventViewDelegate?
     
     var image: UIImage? {
         set(value) {
@@ -120,6 +121,7 @@ fileprivate let ZoomScaleEpsilon: CGFloat = 0.01
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
         scrollView.isScrollEnabled = true
+        zoomEventDelegate?.scrollViewWillBeginZooming(self)
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -191,5 +193,10 @@ fileprivate let ZoomScaleEpsilon: CGFloat = 0.01
     
     @objc(zoomingImageView:maximumZoomScaleForImageSize:)
     func zoomingImageView(_ zoomingImageView: ZoomingImageView, maximumZoomScaleFor imageSize: CGSize) -> CGFloat
-    
+   
 }
+
+protocol ZoomingEventViewDelegate: AnyObject, NSObjectProtocol {
+    func scrollViewWillBeginZooming(_ zoomingImageView: ZoomingImageView) -> Void
+}
+
