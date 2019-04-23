@@ -55,32 +55,27 @@ PhotosTransitionControllerDelegate, ZoomingEventViewDelegate {
     /// The close bar button item that is initially set in the overlay's navigation bar. Any 'target' or 'action' provided to this button will be overwritten.
     /// Overriding this is purely for customizing the look and feel of the button.
     /// Alternatively, you may create your own `UIBarButtonItem`s and directly set them _and_ their actions on the `overlayView` property.
-    open var closeBarButtonItem: UIBarButtonItem {
-        get {
-            return UIBarButtonItem(barButtonSystemItem: .stop, target: nil, action: nil)
-        }
-    }
+    open var closeBarButtonItem: UIBarButtonItem = {
+        return UIBarButtonItem.menuButton(self, action: #selector(closeAction(_:)), image: UIBarButtonItem.SystemItem.stop.image())
+    }()
     
     /// The action bar button item that is initially set in the overlay's navigation bar. Any 'target' or 'action' provided to this button will be overwritten.
     /// Overriding this is purely for customizing the look and feel of the button.
     /// Alternatively, you may create your own `UIBarButtonItem`s and directly set them _and_ their actions on the `overlayView` property.
-    open var actionBarButtonItem = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareAction(_:)))
+    open var actionBarButtonItem: UIBarButtonItem = {
+        return UIBarButtonItem.menuButton(self, action: #selector(shareAction(_:)), image: UIBarButtonItem.SystemItem.action.image())
+    }()
     
     let slideshowBarButtonPauseItem: UIBarButtonItem = {
-         let type = UIBarButtonItem.SystemItem.pause
-            let button = UIBarButtonItem(barButtonSystemItem: type, target: self, action: #selector(slideshowAction(_:)))
-            let topImageOffset: CGFloat = 4.0
-            button.imageInsets = UIEdgeInsets(top: topImageOffset, left: 0, bottom: 0, right: 0)
-            return button
+        let topImageOffset: CGFloat = 4.0
+        let imageInsets = UIEdgeInsets(top: topImageOffset, left: 0, bottom: 0, right: 0)
+        return UIBarButtonItem.menuButton(self, action: #selector(slideshowAction(_:)), image: UIBarButtonItem.SystemItem.pause.image(), imageEdgeInsets: imageInsets)
     }()
 
     let slideshowBarButtonPlayItem: UIBarButtonItem = {
-         let type = UIBarButtonItem.SystemItem.play
-            let button = UIBarButtonItem(barButtonSystemItem: type, target: self, action: #selector(slideshowAction(_:)))
-            let topImageOffset: CGFloat = 4.0
-            button.imageInsets = UIEdgeInsets(top: topImageOffset, left: 0, bottom: 0, right: 0)
-            return button
+         return UIBarButtonItem.menuButton(self, action: #selector(slideshowAction(_:)), image: UIBarButtonItem.SystemItem.play.image())
     }()
+
 
     public var automaticSlideshowLoopEnabled = false
 
@@ -1122,4 +1117,46 @@ extension PhotosViewController : UIGestureRecognizerDelegate {
 public extension Notification.Name {
     static let photoLoadingProgressUpdate = Notification.Name("AXPhotoLoadingProgressUpdateNotification")
     static let photoImageUpdate = Notification.Name("AXPhotoImageUpdateNotification")
+}
+
+extension UIBarButtonItem.SystemItem {
+    func image() -> UIImage? {
+        let tempItem = UIBarButtonItem(barButtonSystemItem: self,
+                                       target: nil,
+                                       action: nil)
+        // add to toolbar and render it
+        let bar = UIToolbar()
+        bar.setItems([tempItem],
+                     animated: false)
+        bar.snapshotView(afterScreenUpdates: true)
+
+        // got image from real uibutton
+        let itemView = tempItem.value(forKey: "view") as! UIView
+        for view in itemView.subviews {
+            if let button = view as? UIButton,
+                let image = button.imageView?.image {
+                return image.withRenderingMode(.alwaysTemplate)
+            }
+        }
+
+        return nil
+    }
+}
+
+extension UIBarButtonItem {
+    static func menuButton(_ target: Any?, action: Selector, image: UIImage?, imageEdgeInsets: UIEdgeInsets = UIEdgeInsets.zero) -> UIBarButtonItem {
+        let button = UIButton(type: UIButton.ButtonType.custom)
+        button.addTarget(target, action: action, for: .touchUpInside)
+        button.setImage(image, for: .normal)
+        button.adjustsImageWhenHighlighted = false
+        button.imageEdgeInsets = imageEdgeInsets
+        button.imageView?.tintColor = .white
+
+        let menuBarItem = UIBarButtonItem(customView: button)
+        menuBarItem.customView?.translatesAutoresizingMaskIntoConstraints = false
+        menuBarItem.customView?.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        menuBarItem.customView?.widthAnchor.constraint(equalToConstant: 30).isActive = true
+
+        return menuBarItem
+    }
 }
