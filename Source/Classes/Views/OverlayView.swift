@@ -147,7 +147,7 @@ private var kvoContext: UInt8 = 1
         super.init(frame: .zero)
         
         self.captionView.delegate = self
-        self.captionView.animateCaptionInfoChanges = true
+        self.captionView.animateCaptionInfoChanges = false
         self.addSubview(self.captionView)
 
         self.navigationBarUnderlay.backgroundColor = .clear
